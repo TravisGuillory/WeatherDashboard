@@ -36,4 +36,27 @@ addcity = newCity => {
       .text(newCity)
       .prependTo($("#cityHistoryContainer"));
   }
+
+  getCurrentWeather(place){
+        let urlPrefix = "http://api.openweathermap.org/data/2.5/forecast";
+        let city = "q=" + place +"usmode=json";
+        let key = "&appid=fe92d0ea72a5a2dbcd2810e284c670b1";
+        let queryURL = urlPrefix + city + key;
+
+        jQuery.ajax({
+            url: queryURL,
+            method: "GET"
+        })
+        .then(function(response){
+            console.log(response);
+        })
+
+  }
+
+
 };
+
+/* fe92d0ea72a5a2dbcd2810e284c670b1
+http://api.openweathermap.org/data/2.5/forecast?q=Lafayette,LA,us&mode=json&appid=fe92d0ea72a5a2dbcd2810e284c670b1
+
+http://api.openweathermap.org/data/2.5/weather?q=Lafayette,LA,us&mode=json&appid=fe92d0ea72a5a2dbcd2810e284c670b1 */
