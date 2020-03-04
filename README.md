@@ -12,7 +12,7 @@ GitHub Repository: https://github.com/TravisGuillory/WeatherDashboard
 
 Portfolio: https://github.com/TravisGuillory/Portfolio
 
-![Alt text] https://github.com/TravisGuillory/WeatherDashboard/blob/master/img/screenshot.png
+![Alt text] https://raw.github.com/TravisGuillory/WeatherDashboard/master/img/screenshot.png
 
 
 
