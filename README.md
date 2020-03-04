@@ -6,6 +6,9 @@ Weather Dashboard
 
 Weather information is retrieved from OpenWeather API 
 
+https://travisguillory.github.io/WeatherDashboard/
+
+GitHub Repository: 
 
 
 
