@@ -21,7 +21,7 @@ $(document).ready(() => {
 
   // get city weather of city search input text
   function getWeatherInfo(checkCity) {
-    let urlForecastPrefix = "http://api.openweathermap.org/data/2.5/weather";
+    let urlForecastPrefix = "https://api.openweathermap.org/data/2.5/weather";
     let urlFiveDayPrefix = "https://api.openweathermap.org/data/2.5/forecast";
     let key = "appid=fe92d0ea72a5a2dbcd2810e284c670b1";
     let units = "&units=Imperial";
@@ -67,7 +67,7 @@ $(document).ready(() => {
     $.ajax({
       method: "GET",
       url:
-        "http://api.openweathermap.org/data/2.5/uvi" +
+        "https://api.openweathermap.org/data/2.5/uvi" +
         "?" +
         "appid=fe92d0ea72a5a2dbcd2810e284c670b1" +
         "&lat=" +
