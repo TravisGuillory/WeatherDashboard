@@ -54,7 +54,7 @@ $(document).ready(() => {
       for (let i = 4; i < extendedResponse.list.length; i += 8) {
         $("#forecastExtendedContainer").append(
           $("<div>").addClass("col card bg-primary m-2 p-2")
-            .append($("<p>").text(moment.unix(extendedResponse.list[i].dt).format("M/DD/YYYY")))
+            .append($("<h4>").text(moment.unix(extendedResponse.list[i].dt).format("M/DD/YYYY")))
             .append($("<img>").attr("src","https://openweathermap.org/img/wn/" + extendedResponse.list[i].weather[0].icon + ".png"))
             .append($("<p>").text("Temp: " + extendedResponse.list[i].main.temp + String.fromCharCode(176) +"F"))
             .append($("<p>").text("Humidity: " + extendedResponse.list[i].main.humidity))
@@ -66,21 +66,14 @@ $(document).ready(() => {
   function getUVIndex(lat, lon) {
     $.ajax({
       method: "GET",
-      url:
-        "https://api.openweathermap.org/data/2.5/uvi" +
-        "?" +
-        "appid=fe92d0ea72a5a2dbcd2810e284c670b1" +
-        "&lat=" +
-        lat +
-        "&lon=" +
-        lon +
-        "&mode=json",
+      url: "https://api.openweathermap.org/data/2.5/uvi" +"?" + "appid=fe92d0ea72a5a2dbcd2810e284c670b1" +"&lat=" +
+        lat +"&lon=" + lon + "&mode=json",
       method: "GET",
       error: function() {
         alert("No UV Index available for stated location");
       }
     }).done(function(uvResponse) {
-      $(".uv-intensity").text(uvResponse.value).css("color", "white");
+      $(".uv-intensity").text(uvResponse.value).css("color", "white").css("F=font-weight: bold");
       let uvRanges = [[0, 2.9, "#3EA72D"], [3.1, 7, "#FFF300"], [8.0, 999, "#E53210"]];
         uvRanges.forEach(element => {
         if (uvResponse.value < Math.max(...element.slice(0, 2)) && uvResponse.value > Math.min(...element.slice(0, 2))){
