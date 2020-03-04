@@ -1,99 +1,144 @@
-$(document).ready(()=>{
-
-
-
-// city search input handler to prevent default and
-// invoke same function as search button click
-  $("#citySearchInput").keyup(event => {
-    event.preventDefault();
-
-    if (event.keyCode === 13 && event.target.value != "") {
-      addcity(event.target.value);
-      getCurrentWeather(event.target.value);
-      event.target.value = "";
-    }
-  });
-
-// click handler for city search buton
+$(document).ready(() => {
+  // capture citySearchInput value with search button click if text is not blank
+  // ajax call the Weather API to get weather data of the input city
   $("#citySearchButton").click(function(event) {
     event.preventDefault();
 
     if ($("#citySearchInput").val() != "") {
-      addcity($("#citySearchInput").val());
+      getWeatherInfo(titleCaseConvert($("#citySearchInput").val()));
       $("#citySearchInput").val("");
     }
   });
-  addcity = ((newCity) => {
-    let numCityButtons = $("#cityHistoryContainer").children().length;
-    if (numCityButtons < 8) {
-      $("<button>")
-        .addClass("input-group-text bg-light w-100 priorCityButton")
-        .text(newCity)
-        .prependTo($("#cityHistoryContainer"));
-    } else {
-      $("#cityHistoryContainer")
-        .children()
-        .last()
-        .remove();
-      $("<button>")
-        .addClass("input-group-text bg-light w-100 priorCityButton")
-        .text(newCity)
-        .prependTo($("#cityHistoryContainer"));
+
+  // enter key handler to capture citySearchInput value for city search in Weather API
+  $("#citySearchInput").keyup(event => {
+    event.preventDefault();
+    if (event.keyCode === 13 && event.target.value != "") {
+      getWeatherInfo(titleCaseConvert($("#citySearchInput").val()));
+      $("#citySearchInput").val("");
     }
   });
 
-
-
-  // function to search Weather API for current forecast
-  getCurrentWeather = (() =>{
-    let urlPrefix = "http://api.openweathermap.org/data/2.5/weather";
-    
+  // get city weather of city search input text
+  function getWeatherInfo(checkCity) {
+    let urlForecastPrefix = "http://api.openweathermap.org/data/2.5/weather";
+    let urlFiveDayPrefix = "https://api.openweathermap.org/data/2.5/forecast";
     let key = "appid=fe92d0ea72a5a2dbcd2810e284c670b1";
-    let city = "?q=Houston";
     let units = "&units=Imperial";
-    let queryURL = urlPrefix + city + "&" + key  + units;
-    let uvURLPrevix = "http://api.openweathermap.org/data/2.5/uvi";
-    let lat;
-    let lon;
+    let city = "?q=" + checkCity;
 
-    jQuery.ajax({
-      url: queryURL,
-      method: "GET"
-    })
-    .then(function(response){
-      console.log(response);
-      $(".city").text(response.name);
-      $(".temp").text("Temperature: " + (response.main.temp + String.fromCharCode(176)  +" F"));
-      $(".humidity").text("Humidity: " + response.main.humidity + "%");
-      $(".wind-speed").text("Wind speed: " + response.wind.speed + " mph");
-      $(".uv-index").text("UV index: " + response);
-      lon =  "&lon=" + (parseFloat(response.coord.lon)).toFixed(2);
-      lat =  "&lat=" + (parseFloat(response.coord.lat).toFixed(2));
-      getUVIndex(lat, lon);
-    })
+    $.ajax({
+      url: urlForecastPrefix + city + units + "&" + key + "&mode=json",
+      method: "GET",
+      success: function() {
+        addButton(checkCity);
+      },
+      error: function() {
+        alert("No Info Available for User Input");
+      }
+    }).then(function(response) {
+      updateWeather(response);
+    });
 
-    getUVIndex = ((lat, lon) =>{
-      jQuery.ajax({
-        url: uvURLPrevix  + "?" + key  + lat + lon,
-        method: "GET"
-        
-      })
-      .then(function(uvResponse){
-        console.log(uvResponse.value);
-        $(".uv-index").text("UV Index: " + uvResponse.value);
+    // Now get 5 day extended forecast
+    $.ajax({
+      url: urlFiveDayPrefix + city + units + "&" + key,
+      method: "GET",
+      error: function() {
+        console.log("Extended Forecast Not Available");
+      }
+    }).then(function(extendedResponse) {
+      console.log(extendedResponse);
+      $("#forecastExtendedContainer").empty();
+      // using 12 noon as time of day to display weather
+      for (let i = 4; i < extendedResponse.list.length; i += 8) {
+        $("#forecastExtendedContainer").append(
+          $("<div>").addClass("col card bg-primary m-2 p-2")
+            .append($("<p>").text(moment.unix(extendedResponse.list[i].dt).format("M/DD/YYYY")))
+            .append($("<img>").attr("src","https://openweathermap.org/img/wn/" + extendedResponse.list[i].weather[0].icon + ".png"))
+            .append($("<p>").text("Temp: " + extendedResponse.list[i].main.temp + String.fromCharCode(176) +"F"))
+            .append($("<p>").text("Humidity: " + extendedResponse.list[i].main.humidity))
+        );
+      }
+    });
+  }
+
+  function getUVIndex(lat, lon) {
+    $.ajax({
+      method: "GET",
+      url:
+        "http://api.openweathermap.org/data/2.5/uvi" +
+        "?" +
+        "appid=fe92d0ea72a5a2dbcd2810e284c670b1" +
+        "&lat=" +
+        lat +
+        "&lon=" +
+        lon +
+        "&mode=json",
+      method: "GET",
+      error: function() {
+        alert("No UV Index available for stated location");
+      }
+    }).done(function(uvResponse) {
+      $(".uv-intensity").text(uvResponse.value).css("color", "white");
+      let uvRanges = [[0, 2.9, "#3EA72D"], [3.1, 7, "#FFF300"], [8.0, 999, "#E53210"]];
+        uvRanges.forEach(element => {
+        if (uvResponse.value < Math.max(...element.slice(0, 2)) && uvResponse.value > Math.min(...element.slice(0, 2))){
+          $(".uv-intensity").css("background-color", element[2]);
+        }
+      });
+    });
+  }
+  // Function to  add a button to left container with the city name captured in input text
+  function addButton(newCity) {
+    let numCityButtons = $("#cityHistoryContainer").children().length;
+
+    // If there is a prior city button with the same name as the input city name then delete it
+    $("#cityHistoryContainer")
+      .children()
+      .each((index, element) => {
+        if (element.innerHTML == newCity) {
+          element.remove();
+        }
       });
 
-    })
+    let newCityButtton = $("<button>") // ceate a button with the city name
+      .addClass("input-group-text bg-light w-100 priorCityButton")
+      .text(newCity)
+      .click(() => {
+        getWeatherInfo(event.target.innerHTML);
+        event.target.remove();
+      });
+    if (numCityButtons < 8) {
+      // If the number of current buttons is less than 8, prepend it
+      newCityButtton.prependTo($("#cityHistoryContainer"));
+    } else {
+      // If the number of current city buttons is 8 or more delete the last one then prepend
+      $("#cityHistoryContainer")
+        .children()
+        .last()
+        .remove()
+        .prepend(newCityButtton);
+    }
+  }
 
-    
-  
-  });
+  function updateWeather(data) {
+    $("#forecastCurrentContainer").empty();
+    $("#forecastCurrentContainer").append($("<h2>").text(data.name + " " + moment().format("(M/d/YYYY)")).addClass("d-inline"))
+      .append($("<img>").attr("src","https://openweathermap.org/img/wn/" + data.weather[0].icon + ".png"))
+      .append($("<p>").text("Temperature: " + data.main.temp + String.fromCharCode(176) + "F"))
+      .append($("<p>").text("Humidity: " + data.main.humidity + String.fromCharCode(37)))
+      .append($("<p>").text("Wind Speed: " + data.wind.speed + " MPH"))
+      .append($("<p>").text("UV index: ").append($("<span>").addClass("uv-intensity alert b-1")));
 
+    // Get uv index
+    getUVIndex(data.coord.lat, data.coord.lon);
+  }
 
-
-
+  // Function to convert a string to titleCase to correct user type on case
+  titleCaseConvert = str => {
+      return str.toLowerCase().split(" ").map(function (word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(" ");
+  };
 }); // End of Dom ready
-/* fe92d0ea72a5a2dbcd2810e284c670b1
-http://api.openweathermap.org/data/2.5/forecast?q=Lafayette,LA,us&mode=json&appid=fe92d0ea72a5a2dbcd2810e284c670b1
-
-http://api.openweathermap.org/data/2.5/weather?q=Lafayette,LA,us&mode=json&appid=fe92d0ea72a5a2dbcd2810e284c670b1 */
