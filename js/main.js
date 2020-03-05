@@ -6,7 +6,9 @@ $(document).ready(() => {
     addButton(priorCities[i]);
   }
   // Get the weather info of the most recently input city from local storage memory
-  getWeatherInfo(priorCities[0]);
+   if (priorCities[0] != null || priorCities[0] != undefined){
+     getWeatherInfo(priorCities[0]);
+   }
 
   // capture citySearchInput value with search button click if text is not blank
   // ajax call the Weather API to get weather data of the input city
