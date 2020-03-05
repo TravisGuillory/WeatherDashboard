@@ -10,7 +10,9 @@ https://travisguillory.github.io/WeatherDashboard/
 
 GitHub Repository: https://github.com/TravisGuillory/WeatherDashboard
 
+Portfolio: https://travisguillory.github.io/Portfolio/index.html
 
+![Alt text](https://raw.github.com/TravisGuillory/WeatherDashboard/master/img/screenshot.png?raw=true)
 
 
 
