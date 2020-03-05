@@ -1,16 +1,13 @@
-// Array for local storage
-
-
 $(document).ready(() => {
   // get stored cities from local memory
   let priorCities = JSON.parse(localStorage.getItem("storedCities")) || [];
   // Loop through stored cities backwards to to add a button for each one
-  for (let i = priorCities.length-1; i >0; i--){
+  for (let i = priorCities.length - 1; i > 0; i--) {
     addButton(priorCities[i]);
   }
   // Get the weather info of the most recently input city from local storage memory
-  getWeatherInfo(priorCities[0]); 
-  
+  getWeatherInfo(priorCities[0]);
+
   // capture citySearchInput value with search button click if text is not blank
   // ajax call the Weather API to get weather data of the input city
   $("#citySearchButton").click(function(event) {
@@ -135,7 +132,7 @@ $(document).ready(() => {
       });
     });
   }
-  
+
   // Function to  add a button to left container with the city name captured in input text
   function addButton(newCity) {
     let numCityButtons = $("#cityHistoryContainer").children().length;
@@ -146,8 +143,8 @@ $(document).ready(() => {
       .each((index, element) => {
         if (element.innerHTML == newCity) {
           element.remove();
-          }
-        });
+        }
+      });
     // ceate a button with the city name
     let newCityButtton = $("<button>") // ceate a button with the city name
       .addClass("input-group-text bg-light w-100 priorCityButton")
@@ -167,12 +164,12 @@ $(document).ready(() => {
         .remove()
         .prepend(newCityButtton);
     }
-      
+
     $("#cityHistoryContainer")
       .children()
       .each((index, element) => {
-          cities.push(element.innerHTML);
-        });
+        cities.push(element.innerHTML);
+      });
     // store list of cities to local starage
     localStorage.setItem("storedCities", JSON.stringify(cities));
   }
