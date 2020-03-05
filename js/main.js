@@ -1,11 +1,16 @@
+// Array for local storage
+let cities = [];
+
 $(document).ready(() => {
   // capture citySearchInput value with search button click if text is not blank
   // ajax call the Weather API to get weather data of the input city
+
   $("#citySearchButton").click(function(event) {
     event.preventDefault();
 
     if ($("#citySearchInput").val() != "") {
       getWeatherInfo(titleCaseConvert($("#citySearchInput").val()));
+      
       $("#citySearchInput").val("");
     }
   });
@@ -15,6 +20,7 @@ $(document).ready(() => {
     event.preventDefault();
     if (event.keyCode === 13 && event.target.value != "") {
       getWeatherInfo(titleCaseConvert($("#citySearchInput").val()));
+      
       $("#citySearchInput").val("");
     }
   });
@@ -48,7 +54,7 @@ $(document).ready(() => {
         console.log("Extended Forecast Not Available");
       }
     }).then(function(extendedResponse) {
-      console.log(extendedResponse);
+    
       $("#forecastExtendedContainer").empty();
       // using 12 noon as time of day to display weather
       for (let i = 4; i < extendedResponse.list.length; i += 8) {
@@ -87,18 +93,15 @@ $(document).ready(() => {
     let numCityButtons = $("#cityHistoryContainer").children().length;
 
     // If there is a prior city button with the same name as the input city name then delete it
-    $("#cityHistoryContainer")
-      .children()
-      .each((index, element) => {
+    $("#cityHistoryContainer").children().each((index, element) => {
         if (element.innerHTML == newCity) {
           element.remove();
+          
         }
       });
 
     let newCityButtton = $("<button>") // ceate a button with the city name
-      .addClass("input-group-text bg-light w-100 priorCityButton")
-      .text(newCity)
-      .click(() => {
+      .addClass("input-group-text bg-light w-100 priorCityButton").text(newCity).click(() => {
         getWeatherInfo(event.target.innerHTML);
         event.target.remove();
       });
@@ -107,12 +110,16 @@ $(document).ready(() => {
       newCityButtton.prependTo($("#cityHistoryContainer"));
     } else {
       // If the number of current city buttons is 8 or more delete the last one then prepend
-      $("#cityHistoryContainer")
-        .children()
-        .last()
-        .remove()
+      $("#cityHistoryContainer").children().last().remove()
         .prepend(newCityButtton);
     }
+  
+    cities = [];
+    $("#cityHistoryContainer").children().each((index, element) =>{
+        cities.push(element.innerHTML);
+    });
+    console.log(cities);
+    localStorage.setItem("cities", cities);
   }
 
   function updateWeather(data) {
@@ -127,7 +134,7 @@ $(document).ready(() => {
     // Get uv index
     getUVIndex(data.coord.lat, data.coord.lon);
   }
-
+  
   // Function to convert a string to titleCase to correct user type on case
   titleCaseConvert = str => {
       return str.toLowerCase().split(" ").map(function (word) {
